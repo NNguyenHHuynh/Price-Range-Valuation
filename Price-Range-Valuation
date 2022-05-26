@@ -1,0 +1,22 @@
+#create BIN_SKU_lookup table: 3 cols
+BIN_SKU_lookup = GENERATESERIES(0,300000,50000) #LB = Lower Bounds
+
+UB = 
+IF(BIN_SKU_lookup[LB]=300000,100000000,
+  BIN_SKU_lookup[LB] + 50000)
+
+BIN_name (x1000) = 
+var range = IF(BIN_SKU_lookup[LB]=300000, CONCATENATE(FORMAT(BIN_SKU_lookup[LB],"#,##0"),CONCATENATE("-","Over 300,000")),
+CONCATENATE(FORMAT(BIN_SKU_lookup[LB],"#,##0"),CONCATENATE("-",FORMAT(BIN_SKU_lookup[UB],"#,##0"))))
+return
+
+SWITCH(
+    BIN_SKU_lookup[LB],
+    0,"P1 ("&range&")",
+    50000,"P2 ("&range&")",
+    100000,"P3 ("&range&")",
+    150000,"P4 ("&range&")",
+    200000,"P5 ("&range&")",
+    250000,"P6 ("&range&")",
+    300000,"P7 ("&range&")"
+)
