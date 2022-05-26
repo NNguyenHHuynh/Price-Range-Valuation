@@ -1,4 +1,5 @@
-#create BIN_SKU_lookup table: 3 cols
+#create table: BIN_SKU_lookup : 3 cols
+
 BIN_SKU_lookup = GENERATESERIES(0,300000,50000) #LB = Lower Bounds
 
 UB = 
@@ -20,3 +21,63 @@ SWITCH(
     250000,"P6 ("&range&")",
     300000,"P7 ("&range&")"
 )
+
+# create col BIN_Namne_SKU in Lookup_SKU
+
+BIN_Name_SKU = 
+LOOKUPVALUE(
+    BIN_SKU_lookup[BIN_name (x1000)],
+    BIN_SKU_lookup[UB],
+    CALCULATE
+        (MIN(BIN_SKU_lookup[UB]),
+        FILTER(BIN_SKU_lookup,BIN_SKU_lookup[UB]>Lookup_SKU[retail_price_value])))
+        
+        
+ #create table: Fact_CS_Ticket
+
+with target_date as (
+	select current_timestamp - interval '3 month' as start_date
+)
+select 
+-- 	m.*
+	m.code,
+    m.sku,
+	m.order_id,
+	m.sale_order_code as so_code,
+	m.created_time + interval '7 hours' as created_ts,
+	m.last_updated_time + interval '7 hours' as last_updated_ts,
+	m.customer_id,
+	m.source,
+	m.status,
+	m.type,
+	m.reason_codes,
+	m.department_code,
+	m.follower_department_code,
+	m.created_by_account_id,
+	m.assigned_account_id,
+	m.follower_account_id
+-- 	a.fullname,
+-- -- 	a.username as assiged_name,
+-- -- 	a1.username as follwer_name,
+from marketplace_ticket_prd as m
+-- left join account_prd as a on m.assigned_account_id = a.account_id
+-- left join account_prd as a1 on m.follower_account_id = a1.account_id
+where
+-- 	code = 'KXKU2U'
+-- 	a.username = 'mai.ttt'
+-- 	m.order_id = 798790
+	m.last_updated_time >= (select start_date from target_date)
+--	and m.assigned_account_id is not null
+
+# table: Lookup_Reason
+
+select
+	code as reason_code,
+	name as reason,
+	ticket_type,
+	status,
+	department_code
+from reason_setting_prd
+WHERE
+	department_code = 'CATEGORY'
+     
